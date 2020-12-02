@@ -14,7 +14,7 @@ def construct_pearson_corr_relevance_vector(feature_matrix, label_vector):
         label_vector (np.ndarray of ints): 1D array with each data point assigned to a column.
 
     Returns:
-        relevancy_vector (np.ndarray): 1D array assigning a Pearson correlation relevancy score to each feature.
+        relevance_vector (np.ndarray): 1D array assigning a Pearson correlation relevance score to each feature.
     """
 
     # TODO: check if input label vector has integer values
@@ -28,12 +28,12 @@ def construct_pearson_corr_relevance_vector(feature_matrix, label_vector):
         binary_label_matrix[:, j] = np.where(label_vector==classes[j], 1.0, 0.0)
         class_probs[j] = np.sum(binary_label_matrix[:, j]) / num_of_samples
 
-    relevancy_vector = np.zeros(num_of_features)
+    relevance_vector = np.zeros(num_of_features)
     for i in range(num_of_features):
         for j in range(num_of_classes):
-            relevancy_vector[i] += np.abs(pearsonr(feature_matrix[:, i], binary_label_matrix[:, j])[0]) * class_probs[j]
+            relevance_vector[i] += np.abs(pearsonr(feature_matrix[:, i], binary_label_matrix[:, j])[0]) * class_probs[j]
     
-    return relevancy_vector
+    return relevance_vector
 
 
 def construct_mutual_info_relevance_vector(feature_matrix, label_vector, seed=None):
@@ -45,15 +45,15 @@ def construct_mutual_info_relevance_vector(feature_matrix, label_vector, seed=No
         label_vector (np.ndarray of ints): 1D array with each data point assigned to a column.
 
     Returns:
-        relevancy_vector (np.ndarray): 1D array assigning a mutual information relevancy score to each feature.
+        relevance_vector (np.ndarray): 1D array assigning a mutual information relevance score to each feature.
     """
 
     if seed is not None:
         np.random.seed(seed=seed)
 
-    relevancy_vector =  mutual_info_classif(feature_matrix, label_vector)
+    relevance_vector =  mutual_info_classif(feature_matrix, label_vector)
 
-    return relevancy_vector
+    return relevance_vector
 
 
 def construct_pearson_corr_redundancy_matrix(feature_matrix):
@@ -96,22 +96,22 @@ def construct_mutual_info_redundancy_matrix(feature_matrix, seed=None):
     return redundancy_matrix
 
 
-def _weight_features_with_quadratic_programming(redundancy_matrix, relevancy_vector, alpha):
+def _weight_features_with_quadratic_programming(redundancy_matrix, relevance_vector, alpha):
     """Assigns an importance weight to each feature according to the output of a quadratic program following the methodology of
     'Rodriguez-Lujan, Irene, et al. "Quadratic programming feature selection." Journal of Machine Learning Research (2010).'
 
     Args:
         redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of features.
-        relevancy_vector (np.ndarray): 1D array assigning a relevancy score to each feature.
-        alpha (float): parameter between 0 and 1 which weights the importance of relevancy (towards 0) vs redundancy (towards 1).
+        relevance_vector (np.ndarray): 1D array assigning a relevance score to each feature.
+        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 0) vs redundancy (towards 1).
 
     Returns:
         weight_vector (np.ndarray): 1D array assigning an importance weight to each feature.
     """     
 
-    num_of_features = len(relevancy_vector)
+    num_of_features = len(relevance_vector)
     P = matrix(redundancy_matrix*(1.0-alpha))
-    q = matrix(-relevancy_vector*alpha)
+    q = matrix(-relevance_vector*alpha)
     G = matrix(-np.eye(num_of_features))
     h = matrix(np.zeros(num_of_features))
     A = matrix(np.ones((1, num_of_features)))
@@ -121,15 +121,15 @@ def _weight_features_with_quadratic_programming(redundancy_matrix, relevancy_vec
 
     return weight_vector
 
-def quadratic_programming_feature_selection(redundancy_matrix, relevancy_vector, num_of_chosen_features, alpha=None):
+def quadratic_programming_feature_selection(redundancy_matrix, relevance_vector, num_of_chosen_features, alpha=None):
     """Selects a subset of features based on a quadratic program following the methodology of
     'Rodriguez-Lujan, Irene, et al. "Quadratic programming feature selection." Journal of Machine Learning Research (2010).'
 
     Args:
         redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of features.
-        relevancy_vector (np.ndarray): 1D array assigning a relevancy score to each feature.
+        relevance_vector (np.ndarray): 1D array assigning a relevance score to each feature.
         num_of_chosen_features (int): number of features to be selected
-        alpha (float): parameter between 0 and 1 which weights the importance of relevancy (towards 0) vs redundancy (towards 1).
+        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 0) vs redundancy (towards 1).
 
     Returns:
         chosen_ones (set): set of integers indexing the selected features.
@@ -139,22 +139,22 @@ def quadratic_programming_feature_selection(redundancy_matrix, relevancy_vector,
     # Set alpha as default if input is None
     if alpha is None:
         bar_q = np.mean(redundancy_matrix)
-        bar_f = np.mean(relevancy_vector)
+        bar_f = np.mean(relevance_vector)
         alpha = bar_q / (bar_q + bar_f)
 
-    feature_weights = _weight_features_with_quadratic_programming(redundancy_matrix, relevancy_vector, alpha)
+    feature_weights = _weight_features_with_quadratic_programming(redundancy_matrix, relevance_vector, alpha)
     ranking = np.argsort(feature_weights)[::-1]
     chosen_ones = set(ranking[:num_of_chosen_features])
 
     return chosen_ones, feature_weights
 
-def greedy_mrmr_feature_selection(redundancy_matrix, relevancy_vector, num_of_chosen_features, seed=None):
+def greedy_mrmr_feature_selection(redundancy_matrix, relevance_vector, num_of_chosen_features, seed=None):
     """Selects a subset of features based on a the Minimum Redundancy Maximum Relevance method found here:
     https://en.wikipedia.org/wiki/Feature_selection#Minimum-redundancy-maximum-relevance_(mRMR)_feature_selection
 
     Args:
         redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of features.
-        relevancy_vector (np.ndarray): 1D array assigning a relevancy score to each feature.
+        relevance_vector (np.ndarray): 1D array assigning a relevance score to each feature.
         num_of_chosen_features (int): number of features to be selected
         seed (int): random seed.
 
@@ -168,7 +168,7 @@ def greedy_mrmr_feature_selection(redundancy_matrix, relevancy_vector, num_of_ch
     if seed is not None:
         np.random.seed(seed=seed)
 
-    num_of_features = len(relevancy_vector)
+    num_of_features = len(relevance_vector)
     chosen_ones = set()
     avg_relevance = 0.0
     avg_redundancy = 0.0
@@ -188,7 +188,7 @@ def greedy_mrmr_feature_selection(redundancy_matrix, relevancy_vector, num_of_ch
                 continue
 
             # Compute mrmr when feature is included
-            new_relevance = avg_relevance * len(chosen_ones) + relevancy_vector[i]
+            new_relevance = avg_relevance * len(chosen_ones) + relevance_vector[i]
             new_avg_relevance = new_relevance / (len(chosen_ones) + 1)
             new_redundancy = avg_redundancy * len(chosen_ones)**2 + 2 * np.sum([redundancy_matrix[i, k] for k in chosen_ones]) + redundancy_matrix[i, i]
             new_avg_redundancy = new_redundancy / (len(chosen_ones) + 1)**2
