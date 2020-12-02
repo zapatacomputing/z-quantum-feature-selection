@@ -10,7 +10,7 @@ setuptools.setup(
     url="https://github.com/zapatacomputing/z-quantum-feature-selection",
     package_dir={"": "src/python"},
     packages=[
-        "zquantum.feature_selection",
+        "zquantum.featureselection",
     ],    
     classifiers=(
         "Programming Language :: Python :: 3",
