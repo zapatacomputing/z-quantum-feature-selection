@@ -9,6 +9,9 @@ setuptools.setup(
     description="A library for performing feature selection with Orquestra.",
     url="https://github.com/zapatacomputing/z-quantum-feature-selection",
     package_dir={"": "src/python"},
+    packages=[
+        "zquantum.feature_selection",
+    ],    
     classifiers=(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
