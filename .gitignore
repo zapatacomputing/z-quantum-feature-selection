@@ -110,4 +110,7 @@ dmypy.json
 # VS Code
 .vscode/
 
+# Mac OS
+.DS_Store
+
 # End of https://www.gitignore.io/api/python
