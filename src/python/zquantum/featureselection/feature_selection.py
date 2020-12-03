@@ -103,7 +103,7 @@ def _weight_features_with_quadratic_programming(redundancy_matrix, relevance_vec
     Args:
         redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of features.
         relevance_vector (np.ndarray): 1D array assigning a relevance score to each feature.
-        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 0) vs redundancy (towards 1).
+        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 1) vs redundancy (towards 0).
 
     Returns:
         weight_vector (np.ndarray): 1D array assigning an importance weight to each feature.
@@ -129,7 +129,7 @@ def quadratic_programming_feature_selection(redundancy_matrix, relevance_vector,
         redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of features.
         relevance_vector (np.ndarray): 1D array assigning a relevance score to each feature.
         num_of_chosen_features (int): number of features to be selected
-        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 0) vs redundancy (towards 1).
+        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 1) vs redundancy (towards 0).
 
     Returns:
         chosen_ones (set): set of integers indexing the selected features.
