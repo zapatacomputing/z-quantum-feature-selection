@@ -5,7 +5,8 @@ from feature_selection import (construct_mutual_info_relevance_vector,
                                construct_mutual_info_redundancy_matrix,
                                construct_pearson_corr_redundancy_matrix,
                                quadratic_programming_feature_selection,
-                               greedy_mrmr_feature_selection)
+                               greedy_mrmr_feature_selection,
+                               generate_reduced_quadratic_program_with_qpfs,)
 
 # The dataset consists of 10 points around (0, 0, 0) and 10 points around (10, 10, 10)
 # The feature vector for point (x, y, z) is (x, y, z, sin(x))
@@ -46,7 +47,9 @@ Q_mi = np.array([[1.71440632, 0.79166823, 0.63154918, 0.57452537],
 
 num_chosen_features = 3
 
-qpfs_chosen_features_pc = set([0, 1, 2])
+# Changing since output is changed to list
+# qpfs_chosen_features_pc = set([0, 1, 2])
+qpfs_chosen_features_pc = [2, 1, 0]
 qpfs_feature_weights_pc = np.array([0.24065306, 0.25723705, 0.43544254, 0.06666735])
 
 qpfs_chosen_features_mi = set([0, 1, 2])
@@ -84,6 +87,7 @@ def test_construct_mutual_info_redundancy_matrix():
 
 def test_quadratic_programming_feature_selection():
     chosen_ones_pc, feature_weights_pc = quadratic_programming_feature_selection(Q_pc, f_pc, num_chosen_features, alpha=None)
+    print("check list order of chosen_ones_pc", chosen_ones_pc)
     assert chosen_ones_pc == qpfs_chosen_features_pc
     assert feature_weights_pc.shape == qpfs_feature_weights_pc.shape
     assert np.isclose(feature_weights_pc, qpfs_feature_weights_pc).all()
@@ -105,3 +109,22 @@ def test_greedy_mrmr_feature_selection():
     assert np.isclose(mrmr_mi, mrmr_mrmr_mi).all()
     assert np.isclose(avg_relevance_mi, mrmr_avg_relevance_mi).all()
     assert np.isclose(avg_redundancy_mi, mrmr_avg_redundancy_mi).all()
+
+def test_generate_reduced_quadratic_program_with_qpfs():
+
+    np.random.seed(314)
+    rand_mat = np.random.rand(6,6)
+    test_Q = rand_mat @ np.transpose(rand_mat)
+    test_f = np.random.rand(6,1)
+
+    # target_reduced_relevance_vector_qubo = np.array([[0.0]])
+
+    num_active_features = 3
+    num_frozen_features = 2
+
+    reduced_redundancy_matrix_qubo, reduced_relevance_vector_qubo, constant_contribution_qubo, deselected_features_qubo, active_features_qubo, frozen_features_qubo = generate_reduced_quadratic_program_with_qpfs(test_Q, test_f, num_active_features, num_frozen_features=num_frozen_features, frozen_vector_strategy="QUBO")
+    reduced_redundancy_matrix_qpfs, reduced_relevance_vector_qpfs, constant_contribution_qpfs, deselected_features_qpfs, active_features_qpfs, frozen_features_qpfs = generate_reduced_quadratic_program_with_qpfs(test_Q, test_f, num_active_features, num_frozen_features=num_frozen_features, frozen_vector_strategy="QPFS")
+    reduced_redundancy_matrix_hyb, reduced_relevance_vector_hyb, constant_contribution_hyb, deselected_features_hyb, active_features_hyb, frozen_features_hyb = generate_reduced_quadratic_program_with_qpfs(test_Q, test_f, num_active_features, num_frozen_features=num_frozen_features, frozen_vector_strategy="hybrid")
+
+    # TODO: come up with tests for this function
+    # assert np.isclose(reduced_relevance_vector_qubo, ).all()

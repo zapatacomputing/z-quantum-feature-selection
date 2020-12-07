@@ -144,7 +144,9 @@ def quadratic_programming_feature_selection(redundancy_matrix, relevance_vector,
 
     feature_weights = _weight_features_with_quadratic_programming(redundancy_matrix, relevance_vector, alpha)
     ranking = np.argsort(feature_weights)[::-1]
-    chosen_ones = set(ranking[:num_of_chosen_features])
+    # chosen_ones = set(ranking[:num_of_chosen_features])
+    # Keeping as list so that the assignment of indices to features is preserved in output
+    chosen_ones = ranking[:num_of_chosen_features]
 
     return chosen_ones, feature_weights
 
@@ -208,3 +210,124 @@ def greedy_mrmr_feature_selection(redundancy_matrix, relevance_vector, num_of_ch
         avg_redundancy = best_avg_redundacy
 
     return chosen_ones, mrmr, avg_relevance, avg_redundancy
+
+
+def generate_reduced_quadratic_program_with_qpfs(redundancy_matrix, relevance_vector, num_active_features, constant_contribution=np.zeros(1), num_frozen_features=0, alpha=None, frozen_vector_strategy="QUBO"):
+    """Generates a reduced instance of the quadratic programming feature selection problem. Splits features into frozen, active, and deselected 
+    corresponding respectively to those automatically chosen, those to be used in the reduced instance, and those to be automatically deselected.
+    The reduced instances are constructed by evaluating certain entries in the optimization argument x to yield an effective constrained instance:
+    Letting 
+    
+    x = x_d \oplus x_a \oplus x_f, 
+    
+    where 
+    x_d is the all-zero vector on the "deslected features"
+    x_a is the remaining optimization variable on the "active features"
+    x_f is the vector of weight assignments for the "frozen features" (the weights vary according to the frozen_vector_strategy)
+
+    The entries corresponding to these vectors are determined by the chosen number of corresponding features, the weights of the full QPFS weight
+    assignment, and the frozen_vector_strategy (see below). These assignments result in the following reduced quadratic program:
+    
+    (x_d \oplus x_a \oplus x_f) Q (x_d \oplus x_a \oplus x_f) + f (x_d \oplus x_a \oplus x_f)
+    = x_a Q' x_a + f' x_a + c
+
+    where
+    Q' is the submatrix of Q of active features
+    f' is the subvector of f of active features plus 2*(x_f*Q) (arising from the cross terms in the first term)
+    c  is the constant contribution formed by (x_f Q x_f) + (f x_f)
+
+    There are several optional strategies for constructing this reduces quadratic program. They vary according to whether the optimal value
+    is consistent with the reduced QUBO problem, the reduced QPFS problem, or a hybrid of the two. These are as follows:
+    "QUBO": frozen vector is an array of all ones, corresponding to the QUBO automatically selecting those features.
+    "QPFS": frozen vector is the subvector of feature weights from the full-instance QPFS weight assignments.
+    "hybrid": frozen vector is the uniform distribution with total weight given by the sum of the frozen feature weights from QPFS.
+
+    Args:
+        redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of features.
+        relevance_vector (np.ndarray): 1D array assigning a relevance score to each feature.
+        num_active_features(int): number of features of reduced problem
+        num_frozen_features(int): number of features to be automatically selected
+        alpha (float): parameter between 0 and 1 which weights the importance of relevance (towards 1) vs redundancy (towards 0).
+
+    Returns:
+        reduced_redundancy_matrix (np.ndarray): 2D square array assigning a correlation score to each pair of active features.
+        reduced_relevance_vector (np.ndarray): 1D array assigning a relevance score to the active features.
+        deselected_features (list): list of features not to be selected
+        active_features (list): list of features to include in reduced problem
+        frozen_features (list): of features automatically selected in reduced problem
+        constant_contribution (np.array): single number representing the constant contribution to the QP score from frozen features
+        frozen_vector_strategy (string): string indicating the strategy for constructing the frozen vector (e.g. "QUBO", "QPFS", "hybrid")
+    """ 
+
+    num_features = relevance_vector.size
+
+    _, feature_weights = quadratic_programming_feature_selection(redundancy_matrix, 
+                                                                relevance_vector, 
+                                                                num_features)
+
+    # print("redundancy_matrix", redundancy_matrix)
+    # print("relevance_vector", relevance_vector)
+    # print("feature_weights", feature_weights)
+    # Check to make sure that num_frozen + num_selected is less than total
+    if num_active_features + num_frozen_features > num_features:
+        raise ValueError("Number of active features plus number of frozen features must be less than number of features in relevance")
+    
+    # Set alpha as default if input is None
+    if alpha is None:
+        bar_q = np.mean(redundancy_matrix)
+        bar_f = np.mean(relevance_vector)
+        alpha = bar_q / (bar_q + bar_f)
+
+    # For each rank (0 is lowest), list entry is the feature index
+    # sorted_features = np.argsort(feature_weights)[::-1]
+    sorted_features = np.argsort(feature_weights)
+    # print("sorted_features", sorted_features)
+
+    # Get lists of frozen, active, and deselected features
+    num_deselected_features = num_features - (num_active_features + num_frozen_features)
+    deselected_features = sorted_features[:num_deselected_features]
+    active_features = sorted_features[num_deselected_features:num_deselected_features+num_active_features]
+    frozen_features = sorted_features[num_deselected_features+num_active_features:]
+    # print(deselected_features, active_features, frozen_features)
+
+    ### Compute reduced redundancy matrix by simply extracting the submatrix of active features
+    reduced_redundancy_matrix = redundancy_matrix[np.ix_(active_features, active_features)]
+    # print("reduced_redundancy_matrix", reduced_redundancy_matrix)
+
+    ### Generate frozen weights vector according to strategy
+    if frozen_vector_strategy is "QUBO":
+        frozen_weights_vector = np.ones(num_frozen_features)
+
+    elif frozen_vector_strategy is "QPFS":
+        frozen_weights_vector = feature_weights[frozen_features]
+
+    elif frozen_vector_strategy is "hybrid":
+        weight_of_frozen_features = np.sum(feature_weights[frozen_features])
+        frozen_weights_vector = weight_of_frozen_features*np.ones(num_frozen_features)/num_frozen_features
+
+    else:
+        raise ValueError(f"Frozen vector strategy {frozen_vector_strategy} not currently supported. Please select consult doc strings for valid options.")
+
+    # print("frozen_weights_vector", frozen_weights_vector)
+    
+    ### Compute reduced relevance vector
+    frozen_active_redundancy_matrix = redundancy_matrix[np.ix_(frozen_features, active_features)] 
+    # print("frozen_active_redundancy_matrix", frozen_active_redundancy_matrix)
+    frozen_redundancy_contribution_vector = frozen_weights_vector @ frozen_active_redundancy_matrix
+    # print("frozen_redundancy_contribution_vector", frozen_redundancy_contribution_vector)
+    reduced_relevance_vector = relevance_vector[active_features].T + 2 * frozen_redundancy_contribution_vector
+    # print("reduced_relevance_vector", reduced_relevance_vector)
+
+    ### TODO: Alternatively, add constant term to diagonal of redundandy matrix?
+    frozen_redundancy_matrix = redundancy_matrix[np.ix_(frozen_features, frozen_features)] 
+    # print("frozen_redundancy_matrix", frozen_redundancy_matrix)
+    frozen_relevance_vector = relevance_vector[frozen_features] 
+    # print("frozen_relevance_vector", frozen_relevance_vector)
+    constant_from_frozen_redundancy = np.dot(frozen_weights_vector, frozen_redundancy_matrix @ frozen_weights_vector)
+    # print("constant_from_frozen_redundancy", constant_from_frozen_redundancy)
+    constant_from_frozen_relevancy = frozen_weights_vector @ frozen_relevance_vector
+    # print("constant_from_frozen_relevancy", constant_from_frozen_relevancy)
+    constant_contribution = constant_from_frozen_redundancy + constant_from_frozen_relevancy
+    # print("constant_contribution", constant_contribution)
+
+    return reduced_redundancy_matrix, reduced_relevance_vector, constant_contribution, deselected_features, active_features, frozen_features
