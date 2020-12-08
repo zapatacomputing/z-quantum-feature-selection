@@ -9,17 +9,12 @@ setuptools.setup(
     description="A library for performing feature selection with Orquestra.",
     url="https://github.com/zapatacomputing/z-quantum-feature-selection",
     package_dir={"": "src/python"},
-    packages=[
-        "zquantum.featureselection",
-    ],    
+    packages=setuptools.find_namespace_packages(
+        include=["zquantum.*"], where="src/python"
+    ),
     classifiers=(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ),
-    install_requires=[
-        "z-quantum-core",
-        "z-quantum-qubo",
-        "dimod==0.9.11",
-        "cvxopt"
-    ],
+    install_requires=["z-quantum-core", "z-quantum-qubo", "dimod==0.9.11", "cvxopt"],
 )
