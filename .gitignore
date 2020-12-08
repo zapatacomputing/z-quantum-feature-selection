@@ -115,7 +115,7 @@ dmypy.json
 
 # Jupyter notbook
 .ipynb_checkpoints
-.ipynb
+*.ipynb
 
 
 # End of https://www.gitignore.io/api/python
