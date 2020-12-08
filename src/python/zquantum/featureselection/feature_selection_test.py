@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from .feature_selection import (
+from feature_selection import (
     construct_mutual_info_relevance_vector,
     construct_pearson_corr_relevance_vector,
     construct_mutual_info_redundancy_matrix,
@@ -64,13 +64,8 @@ num_chosen_features = 3
 qpfs_chosen_features_pc = [2, 1, 0]
 qpfs_feature_weights_pc = np.array([0.24065306, 0.25723705, 0.43544254, 0.06666735])
 
-<<<<<<< HEAD
 qpfs_chosen_features_mi = [2, 0, 1]
 qpfs_feature_weights_mi = np.array([0.3144958,  0.31306083, 0.3622878,  0.01015557])
-=======
-qpfs_chosen_features_mi = set([0, 1, 2])
-qpfs_feature_weights_mi = np.array([0.3144958, 0.31306083, 0.3622878, 0.01015557])
->>>>>>> 6bdaf93020b9d1f5a2a51f81dae835e96aacd03a
 
 mrmr_chosen_features_pc = set([0, 1, 3])
 mrmr_mrmr_pc = 0.09092964032036388
@@ -116,15 +111,8 @@ def test_quadratic_programming_feature_selection():
     assert feature_weights_pc.shape == qpfs_feature_weights_pc.shape
     assert np.isclose(feature_weights_pc, qpfs_feature_weights_pc).all()
 
-<<<<<<< HEAD
     chosen_ones_mi, feature_weights_mi = quadratic_programming_feature_selection(Q_mi, f_mi, num_chosen_features, alpha=None)
     assert (chosen_ones_mi == qpfs_chosen_features_mi).all()
-=======
-    chosen_ones_mi, feature_weights_mi = quadratic_programming_feature_selection(
-        Q_mi, f_mi, num_chosen_features, alpha=None
-    )
-    assert chosen_ones_mi == qpfs_chosen_features_mi
->>>>>>> 6bdaf93020b9d1f5a2a51f81dae835e96aacd03a
     assert feature_weights_mi.shape == qpfs_feature_weights_mi.shape
     assert np.isclose(feature_weights_mi, qpfs_feature_weights_mi).all()
 
@@ -157,11 +145,7 @@ def test_generate_reduced_quadratic_program_with_qpfs():
 
     np.random.seed(314)
     rand_mat = np.random.rand(6, 6)
-<<<<<<< HEAD
     test_Q = rand_mat @ rand_mat.T
-=======
-    test_Q = rand_mat @ np.transpose(rand_mat)
->>>>>>> 6bdaf93020b9d1f5a2a51f81dae835e96aacd03a
     test_f = np.random.rand(6, 1)
 
     # target_reduced_relevance_vector_qubo = np.array([[0.0]])
