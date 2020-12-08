@@ -47,12 +47,10 @@ Q_mi = np.array([[1.71440632, 0.79166823, 0.63154918, 0.57452537],
 
 num_chosen_features = 3
 
-# Changing since output is changed to list
-# qpfs_chosen_features_pc = set([0, 1, 2])
 qpfs_chosen_features_pc = [2, 1, 0]
 qpfs_feature_weights_pc = np.array([0.24065306, 0.25723705, 0.43544254, 0.06666735])
 
-qpfs_chosen_features_mi = set([0, 1, 2])
+qpfs_chosen_features_mi = [2, 0, 1]
 qpfs_feature_weights_mi = np.array([0.3144958,  0.31306083, 0.3622878,  0.01015557])
 
 mrmr_chosen_features_pc = set([0, 1, 3])
@@ -88,12 +86,12 @@ def test_construct_mutual_info_redundancy_matrix():
 def test_quadratic_programming_feature_selection():
     chosen_ones_pc, feature_weights_pc = quadratic_programming_feature_selection(Q_pc, f_pc, num_chosen_features, alpha=None)
     print("check list order of chosen_ones_pc", chosen_ones_pc)
-    assert chosen_ones_pc == qpfs_chosen_features_pc
+    assert (chosen_ones_pc == qpfs_chosen_features_pc).all()
     assert feature_weights_pc.shape == qpfs_feature_weights_pc.shape
     assert np.isclose(feature_weights_pc, qpfs_feature_weights_pc).all()
 
     chosen_ones_mi, feature_weights_mi = quadratic_programming_feature_selection(Q_mi, f_mi, num_chosen_features, alpha=None)
-    assert chosen_ones_mi == qpfs_chosen_features_mi
+    assert (chosen_ones_mi == qpfs_chosen_features_mi).all()
     assert feature_weights_mi.shape == qpfs_feature_weights_mi.shape
     assert np.isclose(feature_weights_mi, qpfs_feature_weights_mi).all()
 
@@ -113,9 +111,9 @@ def test_greedy_mrmr_feature_selection():
 def test_generate_reduced_quadratic_program_with_qpfs():
 
     np.random.seed(314)
-    rand_mat = np.random.rand(6,6)
-    test_Q = rand_mat @ np.transpose(rand_mat)
-    test_f = np.random.rand(6,1)
+    rand_mat = np.random.rand(6, 6)
+    test_Q = rand_mat @ rand_mat.T
+    test_f = np.random.rand(6, 1)
 
     # target_reduced_relevance_vector_qubo = np.array([[0.0]])
 
