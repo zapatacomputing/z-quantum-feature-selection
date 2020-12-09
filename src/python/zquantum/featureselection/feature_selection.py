@@ -4,6 +4,8 @@ from scipy.stats import pearsonr
 from scipy.optimize import minimize, LinearConstraint
 from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
 
+solvers.options['show_progress'] = False
+
 def construct_pearson_corr_relevance_vector(feature_matrix, label_vector):
     """Constructs the Pearson correlation relevance vector of a feature matrix and vector of discrete labels.
         This follows the construction of F on pg. 1495 of 'Rodriguez-Lujan, Irene, et al. "Quadratic programming 
