@@ -221,8 +221,14 @@ class TestQuadraticProgrammingFeatureSelectionRegression:
             frozen_vector_strategy="hybrid",
         )
 
-        # TODO: come up with tests for this function
-        # assert np.isclose(reduced_relevance_vector_qubo, ).all()
+        # TODO: come up with more strict tests for this function
+        # Test that the output objects are all of the expected shape
+        assert reduced_redundancy_matrix_hyb.shape == (3, 3)
+        assert reduced_redundancy_matrix_qubo.shape == (3, 3)
+        assert reduced_redundancy_matrix_qpfs.shape == (3, 3)
+        assert reduced_relevance_vector_hyb.shape == (3, 1)
+        assert reduced_relevance_vector_qubo.shape == (3, 1)
+        assert reduced_relevance_vector_qpfs.shape == (3, 1)
 
 
 class TestPearsonCorrelationCoefficients:
