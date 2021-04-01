@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from .feature_selection import (
+from zquantum.featureselection.feature_selection import (
     construct_mutual_info_relevance_vector,
     construct_pearson_corr_relevance_vector,
     construct_mutual_info_redundancy_matrix,
