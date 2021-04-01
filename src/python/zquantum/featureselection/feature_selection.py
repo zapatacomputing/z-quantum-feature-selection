@@ -16,8 +16,8 @@ def construct_pearson_corr_relevance_vector(
         feature selection." Journal of Machine Learning Research (2010).'
 
     Args:
-        feature_matrix: 2D array with features along the columns and data points along the rows.
-        label_vector: 1D array with each data point assigned to a column.
+        feature_matrix: 2D array with each column representing a feature.
+        label_vector: 1D array with a single row of data.
 
     Returns:
         relevance_vector: 1D array assigning a Pearson correlation relevance score to each feature.
@@ -52,8 +52,8 @@ def construct_mutual_info_relevance_vector(
         See https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html
 
     Args:
-        feature_matrix (np.ndarray): 2D array with features along the columns and data points along the rows.
-        label_vector (np.ndarray of ints): 1D array with each data point assigned to a column.
+        feature_matrix: 2D array with each column representing a feature.
+        label_vector: 1D array with a single row of data.
 
     Returns:
         relevance_vector (np.ndarray): 1D array assigning a mutual information relevance score to each feature.
@@ -73,7 +73,7 @@ def construct_pearson_corr_redundancy_matrix(feature_matrix: np.ndarray) -> np.n
         feature selection." Journal of Machine Learning Research (2010).'
 
     Args:
-        feature_matrix: 2D array with features along the columns and data points along the rows.
+        feature_matrix: 2D array with each column representing a feature.
 
     Returns:
         redundancy_matrix: 2D square array assigning a Pearson correlation score to each pair of features.
@@ -91,7 +91,7 @@ def construct_mutual_info_redundancy_matrix(
     See https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_regression.html
 
     Args:
-        feature_matrix: 2D array with features along the columns and data points along the rows.
+        feature_matrix: 2D array with each column representing a feature.
         seed: random seed.
 
     Returns:
