@@ -158,7 +158,7 @@ def quadratic_programming_feature_selection(
         alpha: parameter between 0 and 1 which weights the importance of relevance (towards 1) vs redundancy (towards 0).
 
     Returns:
-        chosen_ones: list of integers indexing the selected features.
+        selected_features: list of integers indexing the selected features.
         weight_vector: 1D array assigning an importance weight to each of the original features.
     """
     # Ensure that the redundancy matrix is symmetric
@@ -174,11 +174,11 @@ def quadratic_programming_feature_selection(
         redundancy_matrix, relevance_vector, alpha
     )
     ranking = np.argsort(feature_weights)[::-1]
-    # chosen_ones = set(ranking[:num_of_chosen_features])
+    # selected_features = set(ranking[:num_of_chosen_features])
     # Keeping as list so that the assignment of indices to features is preserved in output
-    chosen_ones = ranking[:num_of_chosen_features]
+    selected_features = ranking[:num_of_chosen_features]
 
-    return chosen_ones, feature_weights
+    return selected_features, feature_weights
 
 
 def greedy_mrmr_feature_selection(
@@ -197,7 +197,7 @@ def greedy_mrmr_feature_selection(
         seed: random seed.
 
     Returns:
-        chosen_ones: set of integers indexing the selected features.
+        selected_features: set of integers indexing the selected features.
         mrmr: final mrmr score of selected subset of features.
         avg_relevance: average relevance score of selected subset of features.
         avg_redundancy: average redundancy score of selected subset of features.
@@ -210,13 +210,13 @@ def greedy_mrmr_feature_selection(
     redundancy_matrix = (redundancy_matrix + redundancy_matrix.T) / 2.0
 
     num_of_features = len(relevance_vector)
-    chosen_ones = set()
+    selected_features = set()
     avg_relevance = 0.0
     avg_redundancy = 0.0
     mrmr = avg_relevance - avg_redundancy
 
     # Add feature indexes until k have been chosen
-    while len(chosen_ones) < num_of_chosen_features:
+    while len(selected_features) < num_of_chosen_features:
         best_mrmr = None
         best_feature_idx = None
 
@@ -225,18 +225,18 @@ def greedy_mrmr_feature_selection(
         for i in np.random.permutation(range(num_of_features)):
 
             # Skip if i has already been chosen
-            if i in chosen_ones:
+            if i in selected_features:
                 continue
 
             # Compute mrmr when feature is included
-            new_relevance = avg_relevance * len(chosen_ones) + relevance_vector[i]
-            new_avg_relevance = new_relevance / (len(chosen_ones) + 1)
+            new_relevance = avg_relevance * len(selected_features) + relevance_vector[i]
+            new_avg_relevance = new_relevance / (len(selected_features) + 1)
             new_redundancy = (
-                avg_redundancy * len(chosen_ones) ** 2
-                + 2 * np.sum([redundancy_matrix[i, k] for k in chosen_ones])
+                avg_redundancy * len(selected_features) ** 2
+                + 2 * np.sum([redundancy_matrix[i, k] for k in selected_features])
                 + redundancy_matrix[i, i]
             )
-            new_avg_redundancy = new_redundancy / (len(chosen_ones) + 1) ** 2
+            new_avg_redundancy = new_redundancy / (len(selected_features) + 1) ** 2
             new_mrmr = new_avg_relevance - new_avg_redundancy
 
             # Update best_mrmr and feature index if better is found
@@ -247,12 +247,12 @@ def greedy_mrmr_feature_selection(
                 best_avg_redundacy = new_avg_redundancy
 
         # Add new feature to chosen ones and update optimization quantities
-        chosen_ones.add(best_feature_idx)
+        selected_features.add(best_feature_idx)
         mrmr = best_mrmr
         avg_relevance = best_avg_relevance
         avg_redundancy = best_avg_redundacy
 
-    return chosen_ones, mrmr, avg_relevance, avg_redundancy
+    return selected_features, mrmr, avg_relevance, avg_redundancy
 
 
 def generate_reduced_quadratic_program_with_qpfs(
