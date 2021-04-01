@@ -129,6 +129,7 @@ def _weight_features_with_quadratic_programming(
     """
 
     num_of_features = len(relevance_vector)
+    # Single-letter variables correspond to those used in cvxopt
     P = matrix(redundancy_matrix * (1.0 - alpha))
     q = matrix(-relevance_vector * alpha)
     G = matrix(-np.eye(num_of_features))
