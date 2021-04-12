@@ -1,11 +1,8 @@
 import numpy as np
 import cvxpy as cp
 from scipy.stats import pearsonr
-from scipy.optimize import minimize, LinearConstraint
 from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
-from typing import List, Optional, Union, Tuple
-
-solvers.options["show_progress"] = False
+from typing import List, Union, Tuple
 
 
 def construct_pearson_corr_relevance_vector(
