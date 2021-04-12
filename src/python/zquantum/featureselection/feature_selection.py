@@ -1,5 +1,5 @@
 import numpy as np
-from cvxopt import matrix, solvers
+import cvxpy as cp
 from scipy.stats import pearsonr
 from scipy.optimize import minimize, LinearConstraint
 from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
@@ -129,17 +129,20 @@ def _weight_features_with_quadratic_programming(
     """
 
     num_of_features = len(relevance_vector)
-    # Single-letter variables correspond to those used in cvxopt
-    P = matrix(redundancy_matrix * (1.0 - alpha))
-    q = matrix(-relevance_vector * alpha)
-    G = matrix(-np.eye(num_of_features))
-    h = matrix(np.zeros(num_of_features))
-    A = matrix(np.ones((1, num_of_features)))
-    b = matrix(np.ones(1))
-    opt_x = solvers.qp(P, q, G, h, A, b)["x"]
-    weight_vector = np.array(np.squeeze(opt_x))
+    # Single-letter variables correspond to those used in cvxpy
+    P = redundancy_matrix * (1.0 - alpha)
+    q = -relevance_vector * alpha
+    G = -np.eye(num_of_features)
+    h = np.zeros(num_of_features)
+    A = np.ones((1, num_of_features))
+    b = np.ones(1)
+    x = cp.Variable(num_of_features)
+    problem = cp.Problem(
+        cp.Minimize((1 / 2) * cp.quad_form(x, P) + q.T @ x), [G @ x <= h, A @ x == b]
+    )
 
-    return weight_vector
+    problem.solve()
+    return x.value
 
 
 def quadratic_programming_feature_selection(

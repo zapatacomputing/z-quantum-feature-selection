@@ -130,7 +130,7 @@ class TestQuadraticProgrammingFeatureSelectionRegression:
         )
         sorted(chosen_ones_mi) == sorted(qpfs_chosen_features_mi)
         assert feature_weights_mi.shape == qpfs_feature_weights_mi.shape
-        assert np.isclose(feature_weights_mi, qpfs_feature_weights_mi).all()
+        assert np.isclose(feature_weights_mi, qpfs_feature_weights_mi, atol=1e-5).all()
 
     def test_greedy_mrmr_feature_selection(
         self, num_chosen_features, f_pc, Q_pc, f_mi, Q_mi
