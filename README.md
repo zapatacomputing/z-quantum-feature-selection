@@ -1,5 +1,5 @@
 # z-quantum-feature-selection
-TODO TODO TODO
+
 ## What is it?
 
 `z-quantum-feature-selection` is a library with functions for performing feature selection which can be used with  [Orquestra](https://www.zapatacomputing.com/orquestra/) – the platform developed by [Zapata Computing](https://www.zapatacomputing.com) for performing computations on quantum computers.
