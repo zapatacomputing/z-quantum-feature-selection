@@ -23,7 +23,9 @@ def construct_pearson_corr_relevance_vector(
         relevance_vector: 1D array assigning a Pearson correlation relevance score to each feature.
     """
 
-    # TODO: check if input label vector has integer values
+    if (label_vector.astype(int) != label_vector).all():
+        raise ValueError("Label vector should contain only integer values.")
+
     num_of_samples, num_of_features = feature_matrix.shape
 
     classes = list(set(label_vector))

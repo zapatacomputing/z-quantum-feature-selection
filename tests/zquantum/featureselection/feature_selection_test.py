@@ -87,6 +87,13 @@ class TestQuadraticProgrammingFeatureSelectionRegression:
         assert res.shape == f_pc.shape
         assert np.isclose(res, f_pc).all()
 
+    def test_construct_pearson_corr_relevance_vector_fails_for_non_integer_labels(
+        self, feature_data, label_data, f_pc
+    ):
+        label_data = np.array([0.1] * 10 + [0.2] * 10)
+        with pytest.raises(ValueError):
+            _ = construct_pearson_corr_relevance_vector(feature_data, label_data)
+
     def test_construct_mutual_info_relevance_vector(
         self, feature_data, label_data, f_mi
     ):
