@@ -2,7 +2,9 @@ import numpy as np
 from dimod import BinaryQuadraticModel
 
 
-def prepare_qubo_for_feature_selection(x: np.ndarray, y: np.ndarray, alpha: float):
+def prepare_qubo_for_feature_selection(
+    x: np.ndarray, y: np.ndarray, alpha: float
+) -> BinaryQuadraticModel:
     """Creates a QUBO based on method described in "Quadratic Programming Feature Selection" by Rodriguez et al.
     (https://www.jmlr.org/papers/volume11/rodriguez-lujan10a/rodriguez-lujan10a.pdf)
 

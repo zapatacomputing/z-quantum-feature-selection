@@ -110,4 +110,12 @@ dmypy.json
 # VS Code
 .vscode/
 
+# Mac OS
+.DS_Store
+
+# Jupyter notbook
+.ipynb_checkpoints
+*.ipynb
+
+
 # End of https://www.gitignore.io/api/python
