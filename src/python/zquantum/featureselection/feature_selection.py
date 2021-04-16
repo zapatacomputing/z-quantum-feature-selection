@@ -390,7 +390,8 @@ def generate_reduced_quadratic_program_with_qpfs(
     ]
     frozen_redundancy_contribution_vector = (
         frozen_weights_vector @ frozen_active_redundancy_matrix
-    )[:, np.newaxis]
+    )
+    # )[:, np.newaxis]
     reduced_relevance_vector = (
         frozen_redundancy_contribution_vector
         + effective_relevance_vector[active_features]

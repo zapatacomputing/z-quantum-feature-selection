@@ -178,7 +178,7 @@ class TestQuadraticProgrammingFeatureSelectionRegression:
         np.random.seed(314)
         rand_mat = np.random.rand(6, 6)
         test_Q = rand_mat @ np.transpose(rand_mat)
-        test_f = np.random.rand(6, 1)
+        test_f = np.random.rand(6)
 
         # target_reduced_relevance_vector_qubo = np.array([[0.0]])
 
@@ -233,9 +233,9 @@ class TestQuadraticProgrammingFeatureSelectionRegression:
         assert reduced_redundancy_matrix_hyb.shape == (3, 3)
         assert reduced_redundancy_matrix_qubo.shape == (3, 3)
         assert reduced_redundancy_matrix_qpfs.shape == (3, 3)
-        assert reduced_relevance_vector_hyb.shape == (3, 1)
-        assert reduced_relevance_vector_qubo.shape == (3, 1)
-        assert reduced_relevance_vector_qpfs.shape == (3, 1)
+        assert reduced_relevance_vector_hyb.shape == (3,)
+        assert reduced_relevance_vector_qubo.shape == (3,)
+        assert reduced_relevance_vector_qpfs.shape == (3,)
 
 
 class TestPearsonCorrelationCoefficients:
